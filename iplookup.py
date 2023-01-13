@@ -1,55 +1,55 @@
-import argparse
-import requests
 import shodan
-import os
+import argparse
+import json
 
-def get_ip_info(ip):
-    url = f'https://ipapi.co/{ip}/json/'
-    response = requests.get(url)
-    data = response.json()
-    print('IP Information:')
-    print('----------------')
-    print(f'IP: {data["ip"]}')
-    print(f'City: {data["city"]}')
-    print(f'Region: {data["region"]}')
-    print(f'Country: {data["country_name"]}')
-    print(f'Postal Code: {data["postal"]}')
-    print(f'Latitude: {data["latitude"]}')
-    print(f'Longitude: {data["longitude"]}')
-    print(f'ISP: {data["org"]}')
-    
-def lookup_dns(api,dns):
-    try:
-        # Perform the search
-        results = api.search(f"dns:{dns}")
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Search Shodan')
+parser.add_argument('-i', '--ip', help='Search by IP address')
+parser.add_argument('-d', '--dns', help='Search by DNS name')
+parser.add_argument('-p', '--port', help='Search by port number')
+args = parser.parse_args()
 
-        # Print the results
-        print(f'Results found: {results["total"]}')
-        for result in results['matches']:
-            print(f'IP: {result["ip_str"]}')
-            print(f'Port: {result["port"]}')
-            print(f'Org: {result["org"]}')
-            print(f'Domain: {result["domains"]}')
-            print('-----------------')
+# Instantiate the API client with your own API key
+api_key = "oWeBVwATG5lERwEGUrROOKNdvjIhrzdR"
+api = shodan.Shodan(api_key)
 
-    except shodan.APIError as e:
-        print(f'Error: {e}')
+import json
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='A tool for looking up IP and DNS information')
-    parser.add_argument('-i', '--ip', help='Lookup IP information')
-    parser.add_argument('-s', '--shodan', help='Lookup DNS information with shodan api')
-    args = parser.parse_args()
-    API_KEY = 'oWeBVwATG5lERwEGUrROOKNdvjIhrzdR'
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Search Shodan')
+parser.add_argument('-i', '--ip', help='Search by IP address')
+parser.add_argument('-d', '--dns', help='Search by DNS name')
+parser.add_argument('-p', '--port', help='Search by port number')
+args = parser.parse_args()
 
-    if args.ip:
-        ip = args.ip.strip()
-        get_ip_info(ip)
-    elif args.shodan:
-        if API_KEY is None:
-            print("Error: SHODAN_API_KEY environment variable not set")
-        dns = args.shodan
-        api = shodan.Shodan(API_KEY)
-        lookup_dns(api, dns)
-    else:
-        parser.print_help()
+# Instantiate the API client with your own API key
+api_key = "Your-API-Key"
+api = shodan.Shodan(api_key)
+
+# Perform the search
+if args.ip:
+    results = api.host(args.ip)
+    print(f'Results for IP address {args.ip}:')
+    print(json.dumps(results, indent=2))
+elif args.dns:
+    results = api.search(args.dns)
+    print(f'Results for DNS name {args.dns}:')
+    ips_set = set()
+    for result in results['matches']:
+        if result['ip_str'] not in ips_set:
+            print("City: ", result['location']['city'])
+            print("Country: ", result['location']['country_name'])
+            print("IP: ", result['ip_str'])
+            print("ISP: ", result['isp'])
+            print("Latitude: ", result['location']['latitude'])
+            print("Longitude: ", result['location']['longitude'])
+            print("------------------------------")
+            ips_set.add(result['ip_str'])
+elif args.port:
+    host = api.host(args.port)
+    print(f'Open ports for host {args.port}:')
+    for item in host['data']:
+        print(item['port'])
+else:
+    print('You must provide an IP address, DNS name, or port number to search for.')
+
