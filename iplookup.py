@@ -10,19 +10,6 @@ parser.add_argument('-p', '--port', help='Search by port number')
 args = parser.parse_args()
 
 # Instantiate the API client with your own API key
-api_key = "oWeBVwATG5lERwEGUrROOKNdvjIhrzdR"
-api = shodan.Shodan(api_key)
-
-import json
-
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description='Search Shodan')
-parser.add_argument('-i', '--ip', help='Search by IP address')
-parser.add_argument('-d', '--dns', help='Search by DNS name')
-parser.add_argument('-p', '--port', help='Search by port number')
-args = parser.parse_args()
-
-# Instantiate the API client with your own API key
 api_key = "Your-API-Key"
 api = shodan.Shodan(api_key)
 
